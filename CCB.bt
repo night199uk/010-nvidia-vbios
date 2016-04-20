@@ -1,0 +1,33 @@
+//--------------------------------------
+//--- 010 Editor v6.0 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+//
+// CCB Table
+//
+typedef struct {
+    DWORD ccbPhysPort : 4;
+    DWORD ccbSpeed : 4;
+    DWORD ccbH : 1;
+    DWORD ccbDP : 4;
+    DWORD ccbRsv : 3;
+    DWORD ccbReserved : 8;
+    DWORD ccbMethod : 8; 
+} CCBENTRY;
+
+typedef struct {
+    UBYTE ccbVersion;
+    UBYTE ccbHeaderSize;
+    UBYTE ccbEntryCount;
+    UBYTE ccbEntrySize;
+    UBYTE ccbPrimaryCommPort : 4;
+    UBYTE ccbSecondaryCommPort : 4;
+    local int i;
+    for( i = 0; i < ccbEntryCount; i++ )
+        CCBENTRY ccbEntry;
+} CCBTABLE;

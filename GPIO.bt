@@ -1,0 +1,99 @@
+//--------------------------------------
+//--- 010 Editor v6.0 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+
+//
+// GPIO Assignment Table
+//
+typedef struct {
+    DWORD gpioPinNum : 6;
+    DWORD gpioIo : 1;
+    DWORD gpioI : 1;
+    DWORD gpioFunction : 8;
+    DWORD gpioOutputHWSelect : 8;
+    DWORD gpioInputHWSelect : 5;
+    DWORD gpioGS : 1;
+    DWORD gpioR : 1;
+    DWORD gpioPM : 1;
+    UBYTE gpioLockPin : 4;
+    UBYTE gpioFT : 1;
+    UBYTE gpioFE : 1;
+    UBYTE gpioOT : 1;
+    UBYTE gpioOE : 1;
+} GPIOASSIGNMENTTABLEENTRY;
+
+typedef struct {
+    UBYTE gpioAssignmentVersion;
+    UBYTE gpioAssignmentHeaderSize;
+    UBYTE gpioAssignmentEntryCount;
+    UBYTE gpioAssignmentEntrySize;
+    WORD gpioAssignmentTablePtr;
+
+    local int i;
+    for( i = 0; i < gpioAssignmentEntryCount; i++ )
+        GPIOASSIGNMENTTABLEENTRY gpioEntry;
+
+} GPIOASSIGNMENTTABLE;
+
+//
+// External GPIO Assignment Table
+//
+
+
+
+//
+// External GPIO Assignment Specific Table
+//
+typedef struct
+{
+} EXTGPIOASSIGNMENTSPECIFICENTRY;
+
+typedef struct
+{
+    UBYTE extGpioAssignmentSpecificVersion;
+    UBYTE extGpioAssignmentSpecificHeaderSize;
+    UBYTE extGpioAssignmentSpecificEntryCount;
+    UBYTE extGpioAssignmentSpecificEntrySize;
+    UBYTE extGpioAssignmentSpecificExternalType;
+    UBYTE extGpioAssignmentSpecificI2CAddress;
+    UBYTE extGpioAssignmentSpecificxInt : 2;
+    UBYTE extGpioAssignmentSpecificRsvd : 2;
+    UBYTE extGpioAssignmentSpecificP : 1;
+    UBYTE extGpioAssignmentSpecificRsvd : 3;
+    local int i;
+    for( i = 0; i < extGpioAssignmentSpecificEntryCount; i++ )
+    {
+        GPIOASSIGNMENTTABLEENTRY extGpioAssignmentSpecificEntry;
+    }
+} EXTGPIOASSIGNMENTSPECIFICTABLE;
+
+typedef struct 
+{
+    WORD extGpioAssingmentSpecificTablePointer;
+} EXTGPIOASSIGNMENTMASTERENTRY;
+
+typedef struct
+{
+    UBYTE extGpioVersion;
+    UBYTE extGpioHeaderSize;
+    UBYTE extGpioEntryCount;
+    UBYTE extGpioEntrySize;
+    EXTGPIOASSIGNMENTMASTERENTRY extGpioAssignmentMasterEntry[extGpioEntryCount];
+    local int i;
+    local int curPos;
+    for( i = 0; i < extGpioEntryCount; i++ )
+    {
+        curPos = FTell();
+        FSeek(extGpioAssignmentMasterEntry[i].extGpioAssingmentSpecificTablePointer);
+        EXTGPIOASSIGNMENTSPECIFICTABLE extGpioAssignmentSpecificTable;
+        FSeek(curPos);
+    }
+} EXTGPIOASSIGNMENTMASTERTABLE;
+
+

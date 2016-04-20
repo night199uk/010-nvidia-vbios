@@ -1,0 +1,97 @@
+//--------------------------------------
+//--- 010 Editor v6.0 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+//
+// DCB Table
+//
+
+#include "CCB.bt"
+#include "Connector.bt"
+#include "GPIO.bt"
+#include "BIT.bt"
+
+typedef struct {
+    DWORD reserved;
+} CRTSPECIFICINFORMATION;
+
+typedef struct  {
+    DWORD dfpEDID : 2;
+    DWORD dfpCtrl : 2;
+    DWORD dfpSLDPL : 2;
+    DWORD dfpRsvd : 2;
+    DWORD dfpExtEnc : 8;
+    DWORD dfpRsvd : 1;
+    DWORD dfpHDMI : 1;
+    DWORD dfpRsvd : 2;
+    DWORD dfpE : 1;
+    DWORD dfpMLR : 3;
+    DWORD dfpMxLM : 4;
+    DWORD dfpRsvd2 : 4;
+} DFPSPECIFICINFORMATION;
+
+typedef struct {
+        DWORD dcbType : 4;
+        DWORD dcbEDIDPort : 4;
+        DWORD dcbHead : 4;
+        DWORD dcbConnector : 4;
+        DWORD dcbBus : 4;
+        DWORD dcbLoc : 2;
+        DWORD dcbBDR : 1;
+        DWORD dcbBBDR : 1;
+        DWORD dcbOutputDevices : 4;
+        DWORD dcbVirtualDevice : 1;
+        DWORD dcbReserved : 3;
+} DISPLAYPATHINFORMATION;
+
+
+typedef struct {
+    DISPLAYPATHINFORMATION dcbDisplayPathInformation;
+    if (dcbDisplayPathInformation.dcbType == 0xF)
+        DWORD skip;
+    else if (dcbDisplayPathInformation.dcbType == 0)
+        CRTSPECIFICINFORMATION crtSpecificInformation;
+    else if (dcbDisplayPathInformation.dcbType == 2 ||
+             dcbDisplayPathInformation.dcbType == 3 ||
+             dcbDisplayPathInformation.dcbType == 5 ||
+             dcbDisplayPathInformation.dcbType == 6)
+        DFPSPECIFICINFORMATION dfpSpecificInformation;
+} DCBENTRY;
+
+typedef struct {
+    UBYTE dcbVersion;
+    UBYTE dcbHeaderSize;
+    UBYTE dcbEntryCount;
+    UBYTE dcbEntrySize;
+    WORD dcbCommunicationControlBlockPointer;
+    DWORD dcbSignature;
+    WORD dcbGPIOAssignmentTablePointer;
+    WORD dcbInputDevicesTablePointer;
+    WORD dcbPersonalCinemaTablePointer;
+    WORD dcbSpreadSpectrumTablePointer;
+    WORD dcbI2CDevicesTablePointer;
+    WORD dcbConnectorTablePointer;
+    UBYTE dcbFlags;
+    WORD dcbHDTVTranslationTablePointer;
+    WORD dcbSwitchedOutputsTablePointer;
+
+    local int i;
+    for( i = 0; i < dcbEntryCount; i++ )
+        DCBENTRY dcbEntry;
+
+    FSeek(dcbCommunicationControlBlockPointer);
+    CCBTABLE ccbtable;
+
+    FSeek(dcbConnectorTablePointer);
+    CONNECTORTABLE connectortable;
+
+    FSeek(dcbGPIOAssignmentTablePointer);
+    GPIOASSIGNMENTTABLE gpioassignmenttable;
+
+    FSeek(gpioassignmenttable.gpioAssignmentTablePtr);
+    EXTGPIOASSIGNMENTMASTERTABLE extGpioAssignmentTable;
+} DCBTABLE;

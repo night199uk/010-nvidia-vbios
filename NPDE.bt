@@ -1,0 +1,22 @@
+//--------------------------------------
+//--- 010 Editor v6.0 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+//
+// GPIO Assignment Table
+//
+typedef struct {
+    UBYTE   npdeSignature[4];
+    UINT16  npdeVersion;
+    UINT16  npdeTableLength;
+    UINT16  npdeImageLength;
+    UBYTE   npdeIndicator;
+    UBYTE   npdeSomething4;
+    
+      
+} NPDEHEADER;

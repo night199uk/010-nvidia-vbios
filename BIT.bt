@@ -1,0 +1,484 @@
+//--------------------------------------
+//--- 010 Editor v6.0 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+//
+// BIT Tables
+//
+typedef struct {
+    WORD bitInitScriptTablePointer;
+    WORD bitMacroIndexTablePointer;
+    WORD bitMacroTablePointer;
+    WORD bitConditionTablePointer;
+    WORD bitIoConditionTablePointer;
+    WORD bitIoFlagConditionTablePointer;
+    WORD bitInitFunctionTablePointer;
+} BITINITTABLE;
+
+typedef struct {
+    local int i;
+
+    UBYTE bitInfoVersion3;
+    UBYTE bitInfoVersion2;
+    UBYTE bitInfoVersion1;
+    UBYTE bitInfoVersion0;
+    UBYTE bitInfoVersion4;
+    WORD bitInfoFeature;
+    DWORD bitInfoUnknownDWord <comment="queried from UEFI driver - used by product key checks">;
+    WORD bitInfoUnknownWord <comment="queried from UEFI driver - used by product key checks">;
+    WORD bitInfoDacLoadOffset;
+    CHAR bitInfoBiosDate[8];
+    WORD bitInfoRealPCIDev;
+    WORD bitInfoSomePointer2;
+    WORD bitInfoSomeTablePointer;
+    WORD bitInfoDacLoadOffset;
+} BITINFOTABLE;
+
+typedef struct
+{
+    WORD bitInfoDisplayScriptEntryMatch;
+    WORD bitInfoDisplayScriptEntryClkCmp0;
+    WORD bitInfoDisplayScriptEntryClkCmp1;
+} BITINFODISPLAYSCRIPTENTRYCONFIG;
+
+typedef struct
+{
+    local int i;
+    local int curPos;
+
+    WORD bitInfoDisplayScriptEntryType;
+    WORD bitInfoDisplayScriptEntryMask;
+    UBYTE bitInfoDisplayScriptEntryUnknown001;
+    UBYTE bitInfoDisplayScriptEntryConfigs;
+    WORD bitInfoDisplayScriptEntryScript1;
+    WORD bitInfoDisplayScriptEntryScript2;
+    if (bitInfoDisplayScriptTableEntryHeaderLength >= 12)
+        WORD bitInfoDisplayScriptEntryScript3;
+
+    curPos = FTell();
+    for (i = 0; i < bitInfoDisplayScriptEntryConfigs; ++i) 
+    {
+        FSeek(startof(this) + bitInfoDisplayScriptTableEntryHeaderLength + (6 * i));
+        BITINFODISPLAYSCRIPTENTRYCONFIG bitInfoDisplayScriptEntryConfig;
+    }
+    FSeek(curPos);
+} BITINFODISPLAYSCRIPTENTRY;
+
+typedef struct
+{
+    local int i;
+    local int curPos;
+    UBYTE bitInfoDisplayScriptTableVersion;
+    UBYTE bitInfoDisplayScriptTableHeaderLength;
+    UBYTE bitInfoDisplayScriptTableEntryLength;
+    UBYTE bitInfoDisplayScriptTableEntryCount;
+    UBYTE bitInfoDisplayScriptTableEntryHeaderLength;
+    WORD bitInfoDisplayScriptTableEntry[bitInfoDisplayScriptTableEntryCount];
+    curPos = FTell();
+    for (i = 0; i < bitInfoDisplayScriptTableEntryCount; ++i)
+    {
+        if (bitInfoDisplayScriptTableEntry[i] != 0)
+        {
+            FSeek(bitInfoDisplayScriptTableEntry[i]);
+            BITINFODISPLAYSCRIPTENTRY   bitInfoDisplayScriptEntry;
+        }
+    }
+    FSeek(curPos);
+} BITINFODISPLAYSCRIPTTABLE;
+
+typedef struct
+{
+    local int curPos;
+    if (bitInfoPLLLimitsTableVersion == 0x20 || bitInfoPLLLimitsTableVersion == 0x21)
+    {
+        DWORD  bitInfoPLLLimitsTableEntryRegister;
+    }
+    else if (bitInfoPLLLimitsTableVersion == 0x40)
+    {
+        UBYTE   bitInfoPLLLimitsEntryID <format=hex>;
+        WORD    bitInfoPLLLimitsEntryRecPtr <format=hex>;
+        DWORD   bitInfoPLLLimitsTableEntryRegister <format=hex>; 
+        WORD    bitInfoPLLLimitsTableEntryAltRefClk <format=decimal>;
+        WORD    bitInfoPLLLimitsTableEntryRefClk <format=decimal>;
+        curPos = FTell();
+        if (bitInfoPLLLimitsEntryRecPtr)
+        {
+            FSeek(bitInfoPLLLimitsEntryRecPtr);
+            WORD bitInfoPLLLimitsTableEntryFreqLow <format=decimal>;
+            WORD bitInfoPLLLimitsTableEntryFreqHigh <format=decimal>;
+            WORD bitInfoPLLLimitsTableEntryInputFreqLow <format=decimal>;
+            WORD bitInfoPLLLimitsTableEntryInputFreqHigh <format=decimal>;
+            UBYTE bitInfoPLLLimitsTableEntryMLow <format=decimal>;
+            UBYTE bitInfoPLLLimitsTableEntryMHigh <format=decimal>;
+            UBYTE bitInfoPLLLimitsTableEntryNLow <format=decimal>;
+            UBYTE bitInfoPLLLimitsTableEntryNHigh <format=decimal>;
+            UBYTE bitInfoPLLLimitsTableEntryPLow <format=decimal>;
+            UBYTE bitInfoPLLLimitsTableEntryPHigh <format=decimal>;
+        }
+        FSeek(curPos);
+    }
+} BITINFOPLLLIMITSTABLEENTRY;
+
+typedef struct
+{
+    local int i;
+    local int curPos;
+
+    UBYTE bitInfoPLLLimitsTableVersion <format=hex>;
+    UBYTE bitInfoPLLLimitsTableTableHeaderLength <format=hex>;
+    UBYTE bitInfoPLLLimitsTableTableEntryLength <format=hex>;
+    UBYTE bitInfoPLLLimitsTableTableEntryCount <format=decimal>;
+    UBYTE bitInfoPLLLimitsTableTableEntryHeaderLength <format=hex>;
+    curPos = FTell();
+    for (i = 0; i < bitInfoPLLLimitsTableTableEntryCount; ++i)
+    {
+        BITINFOPLLLIMITSTABLEENTRY bitInfoPLLLimitsTableTableEntry;
+    }
+    FSeek(curPos);
+} BITINFOPLLLIMITSTABLE;
+
+
+typedef struct
+{
+    UBYTE bitInfoDisplayPortCfgPC;
+    UBYTE bitInfoDisplayPortCfgDC;
+    UBYTE bitInfoDisplayPortCfgPE;
+    UBYTE bitInfoDisplayPortCfgTxPu;
+    if (bitInfoDisplayPortTableVersion < 0x40)
+    {
+        UBYTE bitInfoDisplayPortCfgUnknown;
+    }
+} BITINFODISPLAYPORTCFG;
+
+
+typedef struct
+{
+    local int j;
+    WORD bitInfoDisplayPortOutType; // 0+1
+    WORD bitInfoDisplayPortOutMask; // 2+3
+    if (bitInfoDisplayPortTableVersion == 0x21 ||
+        bitInfoDisplayPortTableVersion == 0x30)
+    {
+        UBYTE bitInfoDisplayPortConfigEntryCount;
+        UBYTE bitInfoDisplayPortOutFlags;// 4 - Config Entry Count
+        WORD bitInfoDisplayPortOutScript[2];
+        WORD bitInfoDisplayPortOutLnkCmp;
+        if (bitInfoDisplayPortTableOutHeaderLength > 0xf)
+        {
+            WORD bitInfoDisplayPortOutScript2[2];
+        }
+        if (bitInfoDisplayPortTableOutHeaderLength > 0x11)
+        {
+            WORD bitInfoDisplayPortOutScript3[1];
+        }
+        for (j = 0; j < bitInfoDisplayPortConfigEntryCount; ++j)
+        {
+            BITINFODISPLAYPORTCFG bitInfoDisplayPortCfg;
+        }
+    }
+    else if (bitInfoDisplayPortTableVersion == 0x40 ||
+             bitInfoDisplayPortTableVersion == 0x41)
+    {
+        UBYTE bitInfoDisplayPortOutFlags;// 4 - Config Entry Count
+        WORD bitInfoDisplayPortOutScript[2];
+        WORD bitInfoDisplayPortOutLnkCmp;
+        WORD bitInfoDisplayPortOutScript2[3];
+        UBYTE bitInfoDisplayPortOutCfgTable;
+    }
+} BITINFODISPLAYPORTOUT;
+
+typedef struct
+{
+    local int i;
+    local int curPos;
+    UBYTE bitInfoDisplayPortTableVersion;
+    UBYTE bitInfoDisplayPortTableHeaderLength;
+    UBYTE bitInfoDisplayPortTableEntryLength;
+    UBYTE bitInfoDisplayPortTableEntryCount;
+
+    UBYTE bitInfoDisplayPortTableOutHeaderLength; 
+    UBYTE bitInfoDisplayPortTableOutEntryLength;
+
+    if (bitInfoDisplayPortTableVersion == 0x40 || 
+        bitInfoDisplayPortTableVersion == 0x41)
+    {
+        UBYTE bitInfoDisplayPortTableOutCfgEntryLength;
+        UBYTE bitInfoDisplayPortTableOutCfgEntryCount;
+        UBYTE bitInfoDisplayPortTableUnknown;
+    }
+
+    WORD bitInfoDisplayPortTableEntry[bitInfoDisplayPortTableEntryCount];
+    for (i = 0; i < bitInfoDisplayPortTableEntryCount; ++i)
+    {
+        if (bitInfoDisplayPortTableEntry[i] == 0)
+            continue;
+
+        curPos = FTell();
+        FSeek(bitInfoDisplayPortTableEntry[i]);
+        BITINFODISPLAYPORTOUT bitInfoDisplayPortOut <optimize=false>;
+        FSeek(curPos);
+    }
+
+    if (bitInfoDisplayPortTableVersion >= 0x40)
+    {
+        for (i = 0; i < bitInfoDisplayPortTableOutCfgEntryCount; ++i)
+        {
+            BITINFODISPLAYPORTCFG   bitInfoDisplayPortCfg;
+        }
+    }
+
+} BITINFODISPLAYPORTTABLE;
+
+typedef struct
+{
+    UBYTE bitMemType : 4;
+    UBYTE bitMemUnknown0 : 4;
+    UBYTE bitMemUnknown1;
+    UBYTE bitMemUnknown2;
+    UBYTE bitMemUnknown3;
+    UBYTE bitMemUnknown4;
+    UBYTE bitMemUnknown5;
+    UBYTE bitMemUnknown6;
+} BITMEMTYPETABLEENTRY;
+
+typedef struct
+{
+    UBYTE bitMemTypeVersion;
+    UBYTE bitMemTypeHeaderLen;
+    UBYTE bitMemTypeEntryLen;
+    UBYTE bitMemTypeEntryCount;
+    UBYTE bitMemTypeUnknown1;
+    WORD bitMemTypeUnknownPointer1;
+    local int i;
+    for( i = 0; i < bitMemTypeEntryCount; i++ )
+    {
+        BITMEMTYPETABLEENTRY bitMemTypeTableEntry;
+    }
+} BITMEMTYPETABLE;
+
+typedef struct
+{
+    UBYTE bitMemTrainUnknown0;
+} BITMEMTRAINTABLEENTRY;
+
+// Needs more work - I don't get it
+typedef struct
+{
+    UBYTE bitMemTrainVersion;
+    UBYTE bitMemTrainHeaderLen;
+    UBYTE bitMemTrainEntryCount;
+    UBYTE bitMemTrainEntryLen;
+    UBYTE bitMemTrainSubEntries;
+    UBYTE bitMemTrainSubEntryLen;
+    WORD bitMemTrainMClk;
+    struct 
+    {
+        UBYTE bitMemTrainEntry;
+        UBYTE bitMemTrainSubEntry;
+    } bitMemTypeTableEntry[bitMemTrainSubEntries] <optimize=false>;
+} BITMEMTRAINTABLE;
+
+typedef struct {
+    UBYTE bitMemTableEntryCount;
+    local int i;
+    for( i = 0; i < bitMemTableEntryCount; i++ )
+    {
+        if (i == 0x0)
+            WORD bitMemEntry <comment="RESTRICT Table">;
+        else if (i == 0x1)
+        {
+            WORD bitMemEntry <comment="TYPE Table">;
+            local int curPos = FTell();
+            FSeek(startof(this) + bitMemEntry);
+            BITMEMTYPETABLE bitMemTypeTable;
+            FSeek(curPos);
+        }
+        else if (i == 0x2)
+        {
+            WORD bitMemEntry <comment="TRAIN Table">;
+            local int curPos2 = FTell();
+            FSeek(bitMemEntry);
+            BITMEMTRAINTABLE bitMemTrainTable <optimize=false>;
+            FSeek(curPos2);
+        }
+        else
+            WORD bitMemEntry;
+    }
+} BITMEMTABLE;
+
+
+// 0x0840 >> 10 
+typedef struct {
+    UBYTE bitVramEntryHeaderType;
+    WORD bitVramEntryAddress : 5 <comment="Bottom bit of Register to use as mask">; // Bottom Bit of Register to use as mask
+    WORD bitVramEntryAddress : 5 <comment="Top Bit of Register to use">; // Top Bit of Register to use
+    WORD bitVramEntryAddress : 4 <comment="Index into VRAM2Table - indicates Register">; // Index into VRAMTable - indicates Register
+} BITVRAMENTRYHEADER;
+
+typedef struct {
+    UBYTE bitVramTableVersion;
+    UBYTE bitVramTableEntrySize;
+    UBYTE bitVramTableEntryCount;
+    local int i;
+    for ( i = 0; i < bitVramTableEntryCount; i++)
+    {
+        BITVRAMENTRYHEADER bitVramEntryHeader;
+    }
+} BITVRAMTABLE;
+
+typedef struct {
+    UBYTE bitVramEntryHeaderType;
+    DWORD bitVramEntryAddress1 <comment="Register">; // Register
+    DWORD bitVramEntryAddress2;
+    DWORD bitVramEntryAddress3;
+} BITVRAM2ENTRY;
+
+typedef struct {
+    UBYTE bitVram2TableVersion;
+    UBYTE bitVram2TableEntrySize;
+    UBYTE bitVram2TableEntryCount;
+    local int i;
+    for ( i = 0; i < bitVram2TableEntryCount; i++)
+    {
+        BITVRAM2ENTRY bitVramEntry;
+    }
+} BITVRAM2TABLE;
+
+typedef struct {
+    UBYTE bitTMDSTableVersion;
+    UBYTE bitTMDSTableHeaderLen;
+    UBYTE bitTMDSTableEntryCount;
+    WORD  bitTMDSTableUnknown;
+    WORD  bitTMDSTableMinClock <format=decimal>;
+    WORD  bitTMDSTableSingleLinkClock <format=decimal>;
+    WORD  bitTMDSTableDualLinkClock <format=decimal>;
+    WORD  bitTMDSTableHDMIMaxClock <format=decimal>;
+    WORD  bitTMDSTableClockEntry <format=hex>;
+    WORD  bitTMDSTableClockEntryScript <format=hex>;
+} BITTMDSTABLE;
+
+typedef struct {
+    local DWORD bitPMUEntryNextData = FTell() + bitPMUTableEntryHeaderLength;
+    DWORD bitPMUEntryUnknown01;
+    DWORD bitPMUEntryUnknown02;
+    DWORD bitPMUEntryInitAddr;
+    DWORD bitPMUEntryArgsAddr;
+    DWORD bitPMUEntryBootAddr;
+    DWORD bitPMUEntryUnknown06;
+    DWORD bitPMUEntrySizeMod;
+    DWORD bitPMUEntryBootSize;
+    DWORD bitPMUEntryCodeSize;
+    DWORD bitPMUEntryDataAddr;
+    DWORD bitPMUEntryDataAddrPMU;
+    DWORD bitPMUEntryDataSize;
+} BITPMUENTRY;
+
+typedef struct {
+    UBYTE bitPMUEntryHeaderType;
+    UBYTE bitPMUEntryHeaderUnknown01;
+    DWORD bitPMUEntryHeaderOffset;
+    local int curPos = FTell();
+    FSeek(bitPMUEntryHeaderOffset + WeirdoOffset);
+    BITPMUENTRY bitPMUEntry;
+    FSeek(curPos);
+} BITPMUENTRYHEADER;
+
+typedef struct {
+    UBYTE bitPMUTableVersion;
+    UBYTE bitPMUTableHeaderLength;
+    UBYTE bitPMUTableEntryLength;
+    UBYTE bitPMUTableEntryCount;
+    UBYTE bitPMUTableUnknown01;
+    UBYTE bitPMUTableEntryHeaderLength;
+    local int i;
+    local DWORD entryAddress = 0;
+    for ( i = 0; i < bitPMUTableEntryCount; i++)
+    {
+        BITPMUENTRYHEADER bitPmuEntry;
+    }
+} BITPMUTABLE;
+
+typedef struct {
+    CHAR bitId;
+    UBYTE bitVersion;
+    WORD bitLength;
+    WORD bitOffset;
+    local int curPos = FTell();
+    if (bitId == 'I')
+    {
+        FSeek(bitEntry.bitOffset);
+        BITINITTABLE bitInitTable;
+    }
+    if (bitId == 'i')
+    {
+        FSeek(bitEntry.bitOffset);
+        BITINFOTABLE bitInfoTable;
+    }
+    if (bitId == 'M')
+    {
+        FSeek(bitEntry.bitOffset);
+        BITMEMTABLE bitMemTable;
+    }
+    if (bitId == 'd')
+    {
+        FSeek(bitEntry.bitOffset);
+        WORD bitInfoDisplayPortTableOffset;
+        FSeek(bitInfoDisplayPortTableOffset);
+        BITINFODISPLAYPORTTABLE bitInfoDisplayPortTable <optimize=false>;
+    }
+    if (bitId == 'V')
+    {
+        FSeek(bitEntry.bitOffset);
+        WORD bitInfoVramTableOffset;
+        WORD bitInfoVramTable2Offset;
+        FSeek(bitInfoVramTableOffset);
+        BITVRAMTABLE bitVramTable <optimize=false>;
+        FSeek(bitInfoVramTable2Offset);
+        BITVRAM2TABLE bitVramTable2 <optimize=false>;
+    }
+    if (bitId == 'U') // Display Scripts
+    {
+        FSeek(bitEntry.bitOffset);
+        WORD bitInfoDisplayScriptTableOffset;
+        FSeek(bitInfoDisplayScriptTableOffset);
+        BITINFODISPLAYSCRIPTTABLE bitInfoDisplayScriptTable;
+    }
+    if (bitId == 'C') // PLL Limits / Clock Table
+    {
+        FSeek(bitEntry.bitOffset + 8);
+        WORD bitInfoPLLLimitsTableTableOffset;
+        FSeek(bitInfoPLLLimitsTableTableOffset);
+        BITINFOPLLLIMITSTABLE bitInfoPLLLimitsTable;
+    }
+    if (bitId == 'T') // TMDS
+    {
+        FSeek(bitEntry.bitOffset);
+        WORD bitInfoTMDSTableOffset;
+        FSeek(bitInfoTMDSTableOffset);
+        BITTMDSTABLE bitInfoDisplayPortTable <optimize=false>;
+    }
+    if (bitId == 'p') // PMU
+    {
+        FSeek(bitEntry.bitOffset);
+        DWORD bitInfoPMUTableOffset;
+        FSeek(bitInfoPMUTableOffset + WeirdoOffset);
+        BITPMUTABLE bitInfoPMUTable <optimize=false>;
+    }
+    FSeek(curPos);
+} BITENTRY;
+
+typedef struct {
+    UBYTE bitSignature[6];
+    WORD bitVersion;
+    UBYTE bitHeaderSize;
+    UBYTE bitEntrySize;
+    UBYTE bitEntryCount;
+    UBYTE bitChecksum; // adding up all header entries should == 0
+    local int i;
+    for( i = 0; i < bitEntryCount; i++ )
+        BITENTRY bitEntry;
+} BITTABLE;

@@ -1,0 +1,128 @@
+//--------------------------------------
+//--- 010 Editor v5.0.2 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+#include "DCB.bt"
+#include "NPDE.bt"
+
+typedef enum <UBYTE> {
+    IntelX86,
+    OpenFirmware,
+    HPPARISC,
+    EFI,
+    Reserved
+} PCICodeType;
+
+typedef struct {
+    UBYTE       pciSignature[4];
+    WORD        pciVendor;
+    WORD        pciDevice;
+    WORD        pciReserved;
+    WORD        pciDataStructureLength;
+    UBYTE       pciDataStructureRevision;
+    UBYTE       pciClassCode[3];
+    WORD        pciImageLength;             // In 512 byte units
+    WORD        pciRevisionLevel;
+    PCICodeType pciCodeType;
+    UBYTE       pciIndicator;
+    WORD        pciMaximumRuntimeImageLength;
+    WORD        pciConfigUtilityCodeHeader;
+    WORD        pciDMTFCLPPointer;
+} PCIDATASTRUCTURE;
+
+typedef struct 
+{   // bmfh
+    UBYTE       pciRomSignature[2];
+
+        // Check for header
+    if(!(pciRomSignature[0] == 0x55 && pciRomSignature[1] == 0xAA) &&
+       !(pciRomSignature[0] == 0x56 && pciRomSignature[1] == 0x4e))
+    {
+        Warning( "File is not a valid VBIOS file. Template stopped." );
+        return -1;
+    }
+
+    UBYTE       pciInitializationSize; // size of the code in 512 bytes
+    UBYTE       pciEntryPointInit[3];
+    UBYTE       pciReserved[18];
+    WORD        pciDataStructurePointer;
+
+    FSeek(Base + pciRomHeader.pciDataStructurePointer);
+    PCIDATASTRUCTURE pcidatastructure;
+
+//    local int curPos = FTell();
+//    local UINT32 codeStart = (pciEntryPointInit[2] << 8) & pciRomHeader.pciEntryPointInit[1];
+//    local UINT32 codeLength = pciInitializationSize * 512;
+//    FSeek(codeStart);
+//    UBYTE imageCode[codeLength];
+//    FSeek(curPos);
+} PCIROMHEADER;
+
+LittleEndian(); 
+SetBackColor( cLtGray );
+
+local const uint16 BitSignatureLength = 5;
+local const UBYTE BitSignature[6];
+BitSignature[0] = 0xff;
+BitSignature[1] = 0xb8;
+BitSignature[2] = 0x42;
+BitSignature[3] = 0x49;
+BitSignature[4] = 0x54;
+local UINT32 bitLocation;
+
+local UBYTE Indicator = 0;
+local UINT32 Base = 0;
+local UINT32 Offset = 0;
+local UINT32 SecondImageStart = 0;
+local UINT32 CustomImageStart = 0;
+
+while ((Indicator & 0x80) == 0)
+{
+    FSeek(Base);
+    PCIROMHEADER pciRomHeader;
+
+    Offset = pciRomHeader.pcidatastructure.pciImageLength;
+    Indicator = pciRomHeader.pcidatastructure.pciIndicator;
+
+    if (pciRomHeader.pcidatastructure.pciCodeType == 0xe0)
+    {
+        CustomImageStart = Base;
+    }
+
+    if (Base == 0)
+    {
+        SecondImageStart = Offset * 512;
+    }
+
+    FSeek((startof(pciRomHeader) + sizeof(pciRomHeader) + 0xf) & 0xfffffff0);
+    NPDEHEADER npdeHeader;
+
+    if ((npdeHeader.npdeVersion + 0xffffff00) <= 1)
+    {
+        Offset = npdeHeader.npdeImageLength;
+        if (npdeHeader.npdeTableLength >= 0xb)
+        {
+            Indicator = npdeHeader.npdeIndicator;
+        }
+    }
+    Base = Base + Offset * 512;
+}
+local UINT32 WeirdoOffset = CustomImageStart - SecondImageStart;
+
+
+FSeek(0x36);
+WORD dcbOffset;
+if (dcbOffset)
+{
+    FSeek(dcbOffset);
+    DCBTABLE dcbtable <optimize=false>;
+    bitLocation = FindFirst(BitSignature);
+    FSeek(bitLocation);
+    BITTABLE bittable;
+}
+

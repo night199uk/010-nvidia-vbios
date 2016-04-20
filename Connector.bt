@@ -1,0 +1,47 @@
+//--------------------------------------
+//--- 010 Editor v6.0 Binary Template
+//
+// File:
+// Author:
+// Revision:
+// Purpose:
+//--------------------------------------
+
+//
+// Connector Table
+//
+typedef struct
+{
+    DWORD connectorType : 8;
+    DWORD connectorLocation : 4;
+    DWORD connectorA : 1 <comment="Hotplug A Interrupt Generation">;
+    DWORD connectorB : 1 <comment="Hotplug A Interrupt Generation">;
+    DWORD connectorDP2DVIA : 1 <comment="DP2DVI A">;
+    DWORD connectorDP2DVIB : 1 <comment="DP2DVI B">;
+    DWORD connectorC : 1;
+    DWORD connectorD : 1;
+    DWORD connectorDPC : 1;
+    DWORD connectorDPD : 1;
+    DWORD connectorDIA : 1 <comment="DPAux/I2C Select A">;
+    DWORD connectorDIB : 1 <comment="DPAux/I2C Select B">;
+    DWORD connectorDIC : 1 <comment="DPAux/I2C Select C">;
+    DWORD connectorDID : 1 <comment="DPAux/I2C Select D">;
+    DWORD connectorE : 1;
+    DWORD connectorF : 1;
+    DWORD connectorG : 1;
+    DWORD connectorSRA : 1;
+    DWORD connectorLCDID : 3;
+    DWORD connectorRsvd : 1;
+} CONNECTORENTRY;
+
+typedef struct
+{
+    UBYTE connectorVersion;
+    UBYTE connectorHeaderSize;
+    UBYTE connectorEntryCount;
+    UBYTE connectorEntrySize;
+    UBYTE connectorPlatform;
+    local int i;
+    for( i = 0; i < connectorEntryCount; i++ )
+        CONNECTORENTRY connectorEntry;
+} CONNECTORTABLE;
