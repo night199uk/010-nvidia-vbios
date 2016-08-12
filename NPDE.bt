@@ -17,6 +17,4 @@ typedef struct {
     UINT16  npdeImageLength;
     UBYTE   npdeIndicator;
     UBYTE   npdeSomething4;
-    
-      
 } NPDEHEADER;

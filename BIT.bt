@@ -40,7 +40,8 @@ typedef struct {
 
 typedef struct
 {
-    WORD bitInfoDisplayScriptEntryMatch;
+    UBYTE bitInfoDisplayScriptEntryMatch0;
+    UBYTE bitInfoDisplayScriptEntryMatch1;
     WORD bitInfoDisplayScriptEntryClkCmp0;
     WORD bitInfoDisplayScriptEntryClkCmp1;
 } BITINFODISPLAYSCRIPTENTRYCONFIG;
@@ -104,6 +105,11 @@ typedef struct
         DWORD   bitInfoPLLLimitsTableEntryRegister <format=hex>; 
         WORD    bitInfoPLLLimitsTableEntryAltRefClk <format=decimal>;
         WORD    bitInfoPLLLimitsTableEntryRefClk <format=decimal>;
+        UBYTE   bitInfoPLLLimitsTableEntryUnknown01 <format=decimal>;
+        UBYTE   bitInfoPLLLimitsTableEntryUnknown02 <format=decimal>;
+        UBYTE   bitInfoPLLLimitsTableEntryUnknown03 <format=decimal>;
+        UBYTE   bitInfoPLLLimitsTableEntryUnknown04 <format=decimal>;
+        UBYTE   bitInfoPLLLimitsTableEntryUnknown05 <format=decimal>;
         curPos = FTell();
         if (bitInfoPLLLimitsEntryRecPtr)
         {
@@ -154,6 +160,10 @@ typedef struct
     }
 } BITINFODISPLAYPORTCFG;
 
+typedef struct
+{
+    
+} BITINFODISPLAYPORTLINKCMPSCRIPTS;
 
 typedef struct
 {
@@ -193,6 +203,18 @@ typedef struct
 
 typedef struct
 {
+    UBYTE bitDisplayPortUnknown0 : 1;
+    UBYTE bitDisplayPortUnknown1 : 1;
+    UBYTE bitDisplayPortUnknown2 : 1;
+    UBYTE bitDisplayPortUnknown3 : 1;
+    UBYTE bitDisplayPortDP12Disabled : 1;
+    UBYTE bitDisplayPortUnknown5 : 1;
+    UBYTE bitDisplayPortUnknown6 : 1;
+    UBYTE bitDisplayPortUnknown7 : 1;
+} BITINFODISPLAYPORTFLAGS;
+
+typedef struct
+{
     local int i;
     local int curPos;
     UBYTE bitInfoDisplayPortTableVersion;
@@ -208,7 +230,7 @@ typedef struct
     {
         UBYTE bitInfoDisplayPortTableOutCfgEntryLength;
         UBYTE bitInfoDisplayPortTableOutCfgEntryCount;
-        UBYTE bitInfoDisplayPortTableUnknown;
+        BITINFODISPLAYPORTFLAGS bitInfoDisplayPortTableFlags;
     }
 
     WORD bitInfoDisplayPortTableEntry[bitInfoDisplayPortTableEntryCount];
@@ -227,7 +249,7 @@ typedef struct
     {
         for (i = 0; i < bitInfoDisplayPortTableOutCfgEntryCount; ++i)
         {
-            BITINFODISPLAYPORTCFG   bitInfoDisplayPortCfg;
+            BITINFODISPLAYPORTCFG   bitInfoDisplayPortCfg[2] <optimize=false>;
         }
     }
 
@@ -235,9 +257,10 @@ typedef struct
 
 typedef struct
 {
-    UBYTE bitMemType : 4;
-    UBYTE bitMemUnknown0 : 4;
-    UBYTE bitMemUnknown1;
+    UBYTE bitMemType : 4; // DDR2 = 0x0, DDR3 = 0x1, GDDR3 = 0x2, GDDR5 = 0x3, SKIP = 0xf
+    UBYTE bitMemStrap : 4;
+    UBYTE bitMemGroup : 4;
+    UBYTE bitMemVendor : 4;
     UBYTE bitMemUnknown2;
     UBYTE bitMemUnknown3;
     UBYTE bitMemUnknown4;
@@ -251,7 +274,7 @@ typedef struct
     UBYTE bitMemTypeHeaderLen;
     UBYTE bitMemTypeEntryLen;
     UBYTE bitMemTypeEntryCount;
-    UBYTE bitMemTypeUnknown1;
+    UBYTE bitMemTypeType;
     WORD bitMemTypeUnknownPointer1;
     local int i;
     for( i = 0; i < bitMemTypeEntryCount; i++ )
@@ -259,11 +282,6 @@ typedef struct
         BITMEMTYPETABLEENTRY bitMemTypeTableEntry;
     }
 } BITMEMTYPETABLE;
-
-typedef struct
-{
-    UBYTE bitMemTrainUnknown0;
-} BITMEMTRAINTABLEENTRY;
 
 // Needs more work - I don't get it
 typedef struct
@@ -279,34 +297,22 @@ typedef struct
     {
         UBYTE bitMemTrainEntry;
         UBYTE bitMemTrainSubEntry;
-    } bitMemTypeTableEntry[bitMemTrainSubEntries] <optimize=false>;
+    } bitMemTrainTableEntry[bitMemTrainSubEntries] <optimize=false>;
 } BITMEMTRAINTABLE;
 
 typedef struct {
     UBYTE bitMemTableEntryCount;
-    local int i;
-    for( i = 0; i < bitMemTableEntryCount; i++ )
+    if (bitVersion == 2)
     {
-        if (i == 0x0)
-            WORD bitMemEntry <comment="RESTRICT Table">;
-        else if (i == 0x1)
-        {
-            WORD bitMemEntry <comment="TYPE Table">;
-            local int curPos = FTell();
-            FSeek(startof(this) + bitMemEntry);
-            BITMEMTYPETABLE bitMemTypeTable;
-            FSeek(curPos);
-        }
-        else if (i == 0x2)
-        {
-            WORD bitMemEntry <comment="TRAIN Table">;
-            local int curPos2 = FTell();
-            FSeek(bitMemEntry);
-            BITMEMTRAINTABLE bitMemTrainTable <optimize=false>;
-            FSeek(curPos2);
-        }
-        else
-            WORD bitMemEntry;
+        WORD bitMemRestrict <comment="RESTRICT Table">;
+        WORD bitMemType <comment="TYPE Table">;
+        WORD bitMemTrain <comment="TRAIN Table">;
+        local int curPos = FTell();
+        FSeek(bitMemType);
+        BITMEMTYPETABLE bitMemTypeTable;
+        FSeek(bitMemTrain);
+        BITMEMTRAINTABLE bitMemTrainTable <optimize=false>;
+        FSeek(curPos);
     }
 } BITMEMTABLE;
 
